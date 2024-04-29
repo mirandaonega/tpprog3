@@ -16,42 +16,36 @@ class BreadthFirstSearch:
             Solution: Solution found
         """
         # Initialize a node with the initial position
-        node = Node("", grid.start, 0)
-        if node.state == grid.end:
-            return Solution(node) #revisar
+        node = Node("", grid.start, cost=0)
 
-        # Initialize the explored dictionary to be empty
-        explored = {node.state: node}
+        # Initialize the explored dictionary
+        explored = {node.state: True}
+
+        if node.state == grid.end:
+            return Solution(node, explored)
+
+        # Initialize the frontier with the initial node
         frontier = QueueFrontier()
-        frontier.add(node) 
-        
-        while True:
-            if frontier.is_empty():
-                return NoSolution() #REVISAR
-            
-            node = frontier.pop()
+        frontier.add(node)
+
+        while not frontier.is_empty():
+            # Remove a node from the frontier
+            node = frontier.remove()
 
             successors = grid.get_neighbours(node.state)
+            for action, postion in successors.items():
+                child_node = Node(
+                    value="",
+                    state=postion,
+                    cost=node.cost + grid.get_cost(postion),
+                    parent=node,
+                    action=action)
 
-            for action, position in successors.items():
-                p_solucion = node.state #revisar
-                if p_solucion not in explored:
-                    p_node = Node(
-                        value=p_solucion,
-                        state = node, 
-                        cost = node.cost + grid.get_cost(position),
-                        parent = node, 
-                        action = action
-                    )
+                if child_node.state == grid.end:
+                    return Solution(child_node, explored)
 
-                    if p_solucion == grid.end:
-                        return Solution(p_node)
-                    
-                    explored[p_solucion.state] = p_node #revisar
+                if child_node.state not in explored:
+                    explored[child_node.state] = True
+                    frontier.add(child_node)
 
-                    frontier.add(p_node)
-
-"""        # Add the node to the explored dictionary
-        explored[node.state] = True
-        
-        return NoSolution(explored)"""
+        return NoSolution(explored)
