@@ -2,13 +2,14 @@ from ..models.grid import Grid
 from ..models.frontier import PriorityQueueFrontier
 from ..models.solution import NoSolution, Solution
 from ..models.node import Node
+from typing import Callable
 
 def dis_manhattan(node, destino) -> int:
     return sum(abs(a-b) for a, b in zip(node.state, destino))
 
 class GreedyBestFirstSearch:
     @staticmethod
-    def search(grid: Grid) -> Solution:
+    def search(grid: Grid, heuristica: Callable[[Node, tuple[int, int]], int] = dis_manhattan) -> Solution:
         """Find path between two points in a grid using Greedy Best First Search
 
         Args:
@@ -24,12 +25,12 @@ class GreedyBestFirstSearch:
 
         # Initialize the explored dictionary to be empty
         explored = {node.state: node}
-        frontier = PriorityQueueFrontier
+        frontier = PriorityQueueFrontier()
         frontier.add(node, heuristica(node, grid.end))
 
         while True:
             if frontier.is_empty():
-                return NoSolution() #REVISAR
+                return NoSolution(explored) 
 
             node = frontier.pop()
 

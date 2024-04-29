@@ -20,37 +20,36 @@ class UniformCostSearch:
 
         # Initialize the explored dictionary to be empty
         explored = {node.state: node} 
+
         frontier = PriorityQueueFrontier()
         frontier.add(node, node.cost)
 
         while True:
-            #
             if frontier.is_empty():
                 return NoSolution(explored)
             
             node = frontier.pop()
+
+
+            explored[node.state] = node
+
 
             if node.state==grid.end:
                 return Solution(node, explored)
             
             successors = grid.get_neighbours(node.state)
 
-            for action, position in successors.items():
-                c_cost = node.cost + grid.get_cost(position)
+            for action, postion in successors.items():
+                child_cost = node.cost + grid.get_cost(postion)
 
-                if position not in explored or c_cost < explored[position].cost:
-                    c_node = Node(
+                if postion not in explored or child_cost < explored[postion].cost:
+                    child_node = Node(
                         value="",
-                        state = position, 
-                        cost = c_cost,
-                        parent = node, 
-                        action = action
-                    )
+                        state=postion,
+                        cost=child_cost,
+                        parent=node,
+                        action=action)
+                    frontier.add(child_node, child_node.cost)
+                    explored[child_node.state] = child_node
 
-                frontier.add(c_node, c_node.cost)
-                explored[c_node.state] = c_node
-        
-        # Add the node to the explored dictionary
-        explored[node.state] = True
-        
         return NoSolution(explored)
