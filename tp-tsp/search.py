@@ -21,7 +21,6 @@ from problem import OptProblem
 from random import choice
 from time import time
 
-
 class LocalSearch:
     """Clase que representa un algoritmo de busqueda local general."""
 
@@ -100,4 +99,32 @@ class HillClimbingReset(LocalSearch):
 class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
 
-    # COMPLETAR
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion."""
+        self.tour = problem.init
+        self.value = problem.obj_val(problem.init)
+
+        # Inicio del reloj
+        start = time()
+
+        tabu_size = 20
+        limit_niter = 1500
+
+        lista_tabu = []
+
+        global_solution = self.value
+
+        while True:
+            if self.niters < limit_niter: 
+                diff = problem.val_diff(self.value.state)
+                diff_tabu = {act: val for act, val in diff.items() if
+                         ((act not in lista_tabu and act[::-1] not in lista_tabu) # Chequea que tanto la accion como su inversa no esté en la lista tabu
+                         or problem.obj_val(problem.result(self.value.state, act)) > global_solution.value)} # O la admite en el caso de que supere al máximo global
+                max_acts = [act for act, val in diff_tabu.items() 
+                if val == max(diff_tabu.values())]
+
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+            lista_tabu.append(act)
+
+            self.value = problem.result(self.value.state, act), self.value.value + diff[act]
