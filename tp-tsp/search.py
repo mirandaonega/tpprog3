@@ -96,35 +96,87 @@ class HillClimbingReset(LocalSearch):
     # COMPLETAR
 
 
+# Definimos una clase para la lista tabú
+class TabuList():
+  def __init__(self, size: int) -> None:
+    self.lista = [] 
+    self.size = size
+  
+  # Mantiene el largo de la lista quitando elementos de esta como criterio de parada
+  def add(self, action: tuple) -> None:
+    """Agrega una accion a la lista tabú."""
+    self.lista.append(action)
+    if len(self.lista) > self.size:
+      self.lista.pop(0)
+
+
 class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
 
     def solve(self, problem: OptProblem):
         """Resuelve un problema de optimizacion."""
-        self.tour = problem.init
-        self.value = problem.obj_val(problem.init)
 
         # Inicio del reloj
         start = time()
 
-        tabu_size = 20
-        limit_niter = 1500
+        actual = problem.init
+        mejor_estado = actual
 
-        lista_tabu = []
+        # Inicio mi lista con un tamaño de 10
+        l_tabu = TabuList(10)
+        val_objetivo = problem.obj_val(problem.init)
 
-        global_solution = self.value
+        while self.niters < 700:
+           
+           # {Action: diferencia del estado objetivo}
+           diff = problem.val_diff(actual)
+           # Reviso que la accion o su opuesta no esté en la lista tabú
+           sucesores = {vecino: valor for vecino, valor in diff.items() if vecino not in l_tabu.lista and vecino[::-1] }
 
-        while True:
-            if self.niters < limit_niter: 
-                diff = problem.val_diff(self.value.state)
-                diff_tabu = {act: val for act, val in diff.items() if
-                         ((act not in lista_tabu and act[::-1] not in lista_tabu) # Chequea que tanto la accion como su inversa no esté en la lista tabu
-                         or problem.obj_val(problem.result(self.value.state, act)) > global_solution.value)} # O la admite en el caso de que supere al máximo global
-                max_acts = [act for act, val in diff_tabu.items() 
-                if val == max(diff_tabu.values())]
+            # elijo la que tenga mas incremento de valor
+           no_tabues = [act for act, val in sucesores.items() 
+                        if val == max(sucesores.values())] 
+           
+           # Me muevo al sucesor
+           sucesor_selec = choice(no_tabues)
 
-            # Elegir una accion aleatoria
-            act = choice(max_acts)
-            lista_tabu.append(act)
+           actual = problem.result(actual, sucesor_selec)
+           valor = problem.obj_val(actual)
 
-            self.value = problem.result(self.value.state, act), self.value.value + diff[act]
+           l_tabu.add(sucesor_selec)
+           self.niters += 1
+           
+           if val_objetivo < valor:
+              mejor_estado = actual
+              val_obejtivo = valor
+
+        self.tour = mejor_estado
+        self.value = val_obejtivo
+        end = time()
+        self.time = end-start
+         
+        return mejor_estado
+
+           
+
+
+
+        # si no tabues es vacio se traba el alg. 
+        # como definirla y que almacenar
+        # acciones --> que reviertan lo que hizo
+        # prohibir mover la reina hasta x iteraciones
+        # alamacenar estados > que almacenar acciones y puede ser mas complejo
+        # proposiciones sobre atributos. Esucesores que verifique alguna de las propoc de la lista tabu
+        # decidir por cuanto tiempo se almacenan:
+        ## puedo limitar el tamaño y saco lo mas viejo
+        ## establecer un numero de iteraciones para los cuales un estado y una accion se mantienen en la lista tabu --> tenor de tabu
+        ### una vez que un estado haya estado en la lista tabu por cien iteraciones, en la lista lo sacamos
+
+        # criterio de parada
+        ### iteraciones sin mejora
+        ### tiempo cpu o totales
+        ### la f objetivo sobrepasa ciereto umbral
+
+        ## componentes adicionales
+
+        #parametros: iteraciones, lista tabu, tenor de tabu
