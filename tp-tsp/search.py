@@ -94,19 +94,50 @@ class HillClimbingReset(LocalSearch):
     """Algoritmo de ascension de colinas con reinicio aleatorio."""
 
     def solve(self, problem):
+         # Inicio del reloj
         start = time()
-        restarts = 3
 
-        for i in range(restarts):
-            solucion = HillClimbing()
-            solucion.solve(problem)
-            problem.random_reset()
-            self.niters += solucion.niters
-            if self.value < solucion.value:
-                self.tour = solucion.tour
-                self.value = solucion.value
-        
-        self.time = time()-start
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+        self.value = float('-inf')
+        n = 5
+
+        while True:
+
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val ==
+                        max(diff.values())]
+
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+
+            # Retornar si estamos en un optimo local 
+            # (diferencia de valor objetivo no positiva)
+            if diff[act] <= 0:
+                n -= 1
+                if self.value < value:
+                    self.tour = actual
+                    self.value = value
+                
+                if n > 0:
+                    actual = problem.random_reset()
+                    value = problem.obj_val(actual)
+                
+                else:
+                    end = time()
+                    self.time = end-start
+                    return
+
+            # Sino, nos movemos al sucesor
+            else:
+                actual = problem.result(actual, act)
+                value = value + diff[act]
+                self.niters += 1
 
 
 # Definimos una clase para la lista tabú
