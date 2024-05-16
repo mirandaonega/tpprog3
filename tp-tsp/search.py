@@ -21,7 +21,6 @@ from problem import OptProblem
 from random import choice
 from time import time
 
-
 class LocalSearch:
     """Clase que representa un algoritmo de busqueda local general."""
 
@@ -110,7 +109,87 @@ class HillClimbingReset(LocalSearch):
         self.time = time()-start
 
 
+# Definimos una clase para la lista tabú
+class TabuList():
+  def __init__(self, size: int) -> None:
+    self.lista = [] 
+    self.size = size
+  
+  # Mantiene el largo de la lista quitando elementos de esta como criterio de parada
+  def add(self, action: tuple) -> None:
+    """Agrega una accion a la lista tabú."""
+    self.lista.append(action)
+    if len(self.lista) > self.size:
+      self.lista.pop(0)
+
+
 class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
 
-    # COMPLETAR
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion."""
+
+        # Inicio del reloj
+        start = time()
+
+        actual = problem.init
+        mejor_estado = actual
+
+        # Inicio mi lista con un tamaño de 10
+        l_tabu = TabuList(10)
+        val_objetivo = problem.obj_val(problem.init)
+
+        while self.niters < 700:
+           
+           # {Action: diferencia del estado objetivo}
+           diff = problem.val_diff(actual)
+           # Reviso que la accion o su opuesta no esté en la lista tabú
+           sucesores = {vecino: valor for vecino, valor in diff.items() if vecino not in l_tabu.lista and vecino[::-1] }
+
+            # elijo la que tenga mas incremento de valor
+           no_tabues = [act for act, val in sucesores.items() 
+                        if val == max(sucesores.values())] 
+           
+           # Me muevo al sucesor
+           sucesor_selec = choice(no_tabues)
+
+           actual = problem.result(actual, sucesor_selec)
+           valor = problem.obj_val(actual)
+
+           l_tabu.add(sucesor_selec)
+           self.niters += 1
+           
+           if val_objetivo < valor:
+              mejor_estado = actual
+              val_obejtivo = valor
+
+        self.tour = mejor_estado
+        self.value = val_obejtivo
+        end = time()
+        self.time = end-start
+         
+        return mejor_estado
+
+           
+
+
+
+        # si no tabues es vacio se traba el alg. 
+        # como definirla y que almacenar
+        # acciones --> que reviertan lo que hizo
+        # prohibir mover la reina hasta x iteraciones
+        # alamacenar estados > que almacenar acciones y puede ser mas complejo
+        # proposiciones sobre atributos. Esucesores que verifique alguna de las propoc de la lista tabu
+        # decidir por cuanto tiempo se almacenan:
+        ## puedo limitar el tamaño y saco lo mas viejo
+        ## establecer un numero de iteraciones para los cuales un estado y una accion se mantienen en la lista tabu --> tenor de tabu
+        ### una vez que un estado haya estado en la lista tabu por cien iteraciones, en la lista lo sacamos
+
+        # criterio de parada
+        ### iteraciones sin mejora
+        ### tiempo cpu o totales
+        ### la f objetivo sobrepasa ciereto umbral
+
+        ## componentes adicionales
+
+        #parametros: iteraciones, lista tabu, tenor de tabu
