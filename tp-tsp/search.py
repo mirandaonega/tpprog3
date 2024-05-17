@@ -61,8 +61,7 @@ class HillClimbing(LocalSearch):
 
         while True:
 
-            # Determinar las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
+            # Determinar las acciones que se pueden aplicar y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
 
             # Buscar las acciones que generan el mayor incremento de valor obj
@@ -117,14 +116,14 @@ class HillClimbingReset(LocalSearch):
             # Elegimos una acción aleatoria
             act = choice(max_acts)
 
-            # Retornar si estamos en un optimo local 
-            # (diferencia de valor objetivo no positiva)
+            # Retornamos si estamos en un optimo local (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
                 reinicios -= 1
                 if self.value < value:
                     self.tour = actual
                     self.value = value
                 
+                # Si los reinicios son mayores a 0, volvemos a empezar
                 if reinicios > 0:
                     actual = problem.random_reset()
                     value = problem.obj_val(actual)
@@ -134,7 +133,7 @@ class HillClimbingReset(LocalSearch):
                     self.time = end-start
                     return
 
-            # Sino, nos movemos al sucesor
+            # Si no nos movemos al sucesor
             else:
                 actual = problem.result(actual, act)
                 value = value + diff[act]
@@ -164,33 +163,37 @@ class Tabu(LocalSearch):
         # Inicio del reloj
         start = time()
 
+        # Inicializamos el problema
         actual = problem.init
         mejor_estado = actual
 
-        # Inicio mi lista con un tamaño de 10
+        # Iniciamos la lista con un tamaño de 10 y determinamos el valor objetivo
         l_tabu = TabuList(10)
         val_objetivo = problem.obj_val(problem.init)
 
         while self.niters < 700:
            
-           # {Action: diferencia del estado objetivo}
+           # Determinar las acciones que se pueden aplicar y las diferencias en valor objetivo que resultan
            diff = problem.val_diff(actual)
-           # Reviso que la accion o su opuesta no esté en la lista tabú
+
+           # Revisamos que la accion o su opuesta no esté en la lista tabú
            sucesores = {vecino: valor for vecino, valor in diff.items() if vecino not in l_tabu.lista and vecino[::-1] }
 
-            # elijo la que tenga mas incremento de valor
+            # Eligimos la que tenga un mayor incremento de valor objetivo
            no_tabues = [act for act, val in sucesores.items() 
                         if val == max(sucesores.values())] 
            
-           # Me muevo al sucesor
+           # Nos movemos al sucesor
            sucesor_selec = choice(no_tabues)
 
            actual = problem.result(actual, sucesor_selec)
            valor = problem.obj_val(actual)
 
+           # Agregamos la acción que llevó al mejor vecino a la lista tabú para evitar que se repita en el futuro
            l_tabu.add(sucesor_selec)
            self.niters += 1
            
+           # Si el valor objetivo del nuevo estado es mejor que el mejor valor objetivo encontrado hasta ahora, se actualiza el mejor estado y el mejor valor objetivo.
            if val_objetivo < valor:
               mejor_estado = actual
               val_obejtivo = valor
@@ -201,27 +204,3 @@ class Tabu(LocalSearch):
         self.time = end-start
          
         return mejor_estado
-
-           
-
-
-
-        # si no tabues es vacio se traba el alg. 
-        # como definirla y que almacenar
-        # acciones --> que reviertan lo que hizo
-        # prohibir mover la reina hasta x iteraciones
-        # alamacenar estados > que almacenar acciones y puede ser mas complejo
-        # proposiciones sobre atributos. Esucesores que verifique alguna de las propoc de la lista tabu
-        # decidir por cuanto tiempo se almacenan:
-        ## puedo limitar el tamaño y saco lo mas viejo
-        ## establecer un numero de iteraciones para los cuales un estado y una accion se mantienen en la lista tabu --> tenor de tabu
-        ### una vez que un estado haya estado en la lista tabu por cien iteraciones, en la lista lo sacamos
-
-        # criterio de parada
-        ### iteraciones sin mejora
-        ### tiempo cpu o totales
-        ### la f objetivo sobrepasa ciereto umbral
-
-        ## componentes adicionales
-
-        #parametros: iteraciones, lista tabu, tenor de tabu
