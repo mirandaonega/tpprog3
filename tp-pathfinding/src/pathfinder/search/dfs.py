@@ -15,18 +15,18 @@ class DepthFirstSearch:
         Returns:
             Solution: Solution found
         """
-        # Initialize a node with the initial position
+        # Inicializamos un nodo con la posición inicial
         node = Node("", grid.start, cost=0)
 
-        # Initialize the explored dictionary to be empty
+        # Inicializamos el diccionario de nodos explorados vacío
         explored = {}
 
-        # Initialize the frontier with the initial node
+        # Inicializamos la frontera con el nodo inicial
         frontier = StackFrontier()
         frontier.add(node)
 
         while not frontier.is_empty():
-            # Remove a node from the frontier
+            # Elimizamos el primer nodo de la frontera
             node = frontier.remove()
 
             # Return if the node contains a goal state
@@ -34,10 +34,13 @@ class DepthFirstSearch:
                 return Solution(node, explored)
 
             if node.state not in explored:
-                # Mark the node as explored
+                # Marcamos el nodo como explorado (lo agregamos al diccionario)
                 explored[node.state] = True
 
+                # Exploramos los sucesores
                 successors = grid.get_neighbours(node.state)
+
+
                 for action, postion in successors.items():
                     if postion not in explored:
                         child_node = Node(
