@@ -13,39 +13,42 @@ def manhattan_distance(origen, destino):
 class AStarSearch:
     @staticmethod
     def search(grid: Grid, h: Callable[[Node, tuple[int, int]], int] = manhattan_distance ) -> Solution:
-        """Find path between two points in a grid using A* Search
-
+        """Encontrar el camino entre dos puntos en una grilla usando A*
         Args:
-            grid (Grid): Grid of points
+            grid (Grid): Grilla de puntos
 
         Returns:
-            Solution: Solution found
+            Solution: Solución encontrada
         """
-        # Initialize a node with the initial position
+        # Inicializamos un nodo en el estado inicial
         node = Node("", grid.start, 0)
         frontier = PriorityQueueFrontier()
         frontier.add(node, node.cost + h(node.state, grid.end))
 
-        # Initialize the explored dictionary to be empty
+        # Inicializamos el diccionario de los explorados
         explored =  {node.state: node.cost}
         
         
         while True:
             
+            # Chequeamos que la frontera no esté vacía
             if frontier.is_empty():
                 return NoSolution(explored) 
             
             node = frontier.pop()
         
-            # Return if the node contains a goal state
+            # Encontramos un nodo con el valor objetvio, retonamos
             if node.state == grid.end:
                 return Solution(node, explored)        
 
+            # Exploramos los sucesores
             successors = grid.get_neighbours(node.state)
 
+            # Iteramos por cada acción  y calculamos el costo de llegar a esta
             for action, position  in successors.items():
                 child_cost = node.cost + grid.get_cost(position)
-
+                
+                # Chequeamos que la posición no haya sido explorado o que haya sifo pero a un costo menor
                 if position not in explored or child_cost < explored[position]:
                     child_node = Node(
                         value="",
@@ -54,6 +57,7 @@ class AStarSearch:
                         parent=node,
                         action=action)
                     
+                    # Agremos a los explorados el nuevo nodo
                     explored[child_node.state] = child_cost
                     a_star_cost = child_node.cost + h(child_node.state, grid.end)
                     frontier.add(child_node, a_star_cost)
