@@ -7,32 +7,35 @@ from ..models.node import Node
 class BreadthFirstSearch:
     @staticmethod
     def search(grid: Grid) -> Solution:
-        """Find path between two points in a grid using Breadth First Search
+        """Encontrar un camino entre dos puntos de la cuadrícula usando Búsqueda Primero por Anchura
 
         Args:
-            grid (Grid): Grid of points
+            grid (Grid): cuadrícula de puntos
             
         Returns:
-            Solution: Solution found
+            Solution: solución encontrada
         """
-        # Initialize a node with the initial position
+        # Inicializamos un nodo con la posición inicial
         node = Node("", grid.start, cost=0)
 
-        # Initialize the explored dictionary
+        # Inicializamos el diccionario de nodos explorados
         explored = {node.state: True}
 
         if node.state == grid.end:
             return Solution(node, explored)
 
-        # Initialize the frontier with the initial node
+        # Inicializamos la frontera con el nodo inicial
         frontier = QueueFrontier()
         frontier.add(node)
 
-        while not frontier.is_empty():
-            # Remove a node from the frontier
+        while not frontier.is_empty():          # Mientras la frontera no esté vacía
+            # Eliminamos el primer nodo de la frontera
             node = frontier.remove()
 
+            # Exploramos los sucesores
             successors = grid.get_neighbours(node.state)
+
+
             for action, postion in successors.items():
                 child_node = Node(
                     value="",
@@ -41,9 +44,10 @@ class BreadthFirstSearch:
                     parent=node,
                     action=action)
 
+                # Si encontramos un nodo con el valor objetivo, lo retornamos
                 if child_node.state == grid.end:
                     return Solution(child_node, explored)
-
+                
                 if child_node.state not in explored:
                     explored[child_node.state] = True
                     frontier.add(child_node)
