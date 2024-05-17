@@ -100,31 +100,32 @@ class HillClimbingReset(LocalSearch):
         # Arrancamos del estado inicial
         actual = problem.init
         value = problem.obj_val(problem.init)
+        
+        # Utilizaremos estos valores al aplicar los reinicios aleatorios
         self.value = float('-inf')
-        n = 5
+        reinicios = 3
 
         while True:
 
-            # Determinar las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
+            # Determinamos las acciones que se pueden aplicar y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
 
-            # Buscar las acciones que generan el mayor incremento de valor obj
+            # Buscamos las acciones que generan el mayor incremento de valor objetivo
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
 
-            # Elegir una accion aleatoria
+            # Elegimos una acción aleatoria
             act = choice(max_acts)
 
             # Retornar si estamos en un optimo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
-                n -= 1
+                reinicios -= 1
                 if self.value < value:
                     self.tour = actual
                     self.value = value
                 
-                if n > 0:
+                if reinicios > 0:
                     actual = problem.random_reset()
                     value = problem.obj_val(actual)
                 
