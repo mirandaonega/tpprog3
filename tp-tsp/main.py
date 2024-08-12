@@ -15,7 +15,8 @@ import problem
 HILL_CLIMBING = "hill"
 HILL_CLIMBING_RANDOM_RESET = "hill_reset"
 TABU_SEARCH = "tabu"
-ALGO_NAMES = [HILL_CLIMBING, HILL_CLIMBING_RANDOM_RESET, TABU_SEARCH]
+SIMULATED_ALLEANING = "simulated_alleaning"
+ALGO_NAMES = [HILL_CLIMBING, HILL_CLIMBING_RANDOM_RESET, TABU_SEARCH, SIMULATED_ALLEANING]
 
 
 def main() -> None:
@@ -32,7 +33,8 @@ def main() -> None:
     # Construir las instancias de los algoritmos
     algos = {HILL_CLIMBING: search.HillClimbing(),
              HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(),
-             TABU_SEARCH: search.Tabu()}
+             TABU_SEARCH: search.Tabu(),
+             SIMULATED_ALLEANING: search.SimulatedAnnealing()}
 
     # Resolver el TSP con cada algoritmo
     for algo in algos.values():
