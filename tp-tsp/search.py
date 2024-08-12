@@ -20,6 +20,8 @@ from __future__ import annotations
 from problem import OptProblem
 from random import choice
 from time import time
+import math
+import random
 
 class LocalSearch:
     """Clase que representa un algoritmo de busqueda local general."""
@@ -204,3 +206,59 @@ class Tabu(LocalSearch):
         self.time = end-start
          
         return mejor_estado
+
+
+class SimulatedAnnealing(LocalSearch):
+    """Clase que representa un algoritmo de recocido simulado.
+
+    En cada iteracion se mueve al estado sucesor con una probabilidad que depende
+    de la temperatura y la diferencia de valor objetivo.
+    El criterio de parada es alcanzar una temperatura mínima.
+    """
+
+    def __init__(self, t_start=11000, c_factor=0.99, t_end=0.001):
+        """Construye una instancia de la clase."""
+        super().__init__()
+        self.t_start = t_start
+        self.c_factor = c_factor
+        self.t_end = t_end
+
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion con recocido simulado."""
+        # Inicio del reloj
+        start = time()
+
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+
+        while self.t_start > self.t_end:
+            # Determinar las acciones que se pueden aplicar y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val == max(diff.values())]
+
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+
+            # Calcular la probabilidad de aceptar el sucesor
+            p = math.exp(-diff[act] / self.t_start)
+
+            # Generar un número aleatorio r en [0,1]
+            r = random.random()
+
+            # Aceptar el sucesor con probabilidad p
+            if r < p:
+                actual = problem.result(actual, act)
+                value += diff[act]
+                self.niters += 1
+
+            # Disminuir la temperatura
+            self.t_start *= self.c_factor
+
+        # Retornar la solucion encontrada
+        self.tour = actual
+        self.value = value
+        end = time()
+        self.time = end - start
